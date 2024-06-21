@@ -4,7 +4,7 @@
 # C - name of folder to save the file into.
 # Below is a python script that will download the files from the links on column A, give names to the files from column B and save the files in the folders in column C. 
 
-	import pandas as pd
+import pandas as pd
 import requests
 import os
 
