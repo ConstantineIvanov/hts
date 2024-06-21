@@ -1,0 +1,67 @@
+# I have an xls file with 3 columns:
+# A - direct web link to jpg image
+# B - name that should be applied to jpg file after downloading
+# C - name of folder to save the file into.
+# Below is a python script that will download the files from the links on column A, give names to the files from column B and save the files in the folders in column C. 
+
+	import pandas as pd
+import requests
+import os
+
+# Load the Excel file
+file_path = 'your_file.xlsx'  # Replace with the path to your Excel file
+data = pd.read_excel(file_path)
+
+# Print the column names to verify
+print("Column names:", data.columns)
+
+# Update the column names based on the actual names in your file
+# You can adjust 'A', 'B', and 'C' to match the actual column names in your file
+column_a = data.columns[0]  # Assuming the first column is 'A'
+column_b = data.columns[1]  # Assuming the second column is 'B'
+column_c = data.columns[2]  # Assuming the third column is 'C'
+
+# Base directory where folders will be saved
+base_directory = 'downloaded_images'  # You can change this to your desired base directory
+
+# Create the base directory if it doesn't exist
+if not os.path.exists(base_directory):
+    os.makedirs(base_directory)
+
+# Iterate through each row in the DataFrame
+for index, row in data.iterrows():
+    img_url = row[column_a]
+    img_name = row[column_b]
+    folder_name = str(row[column_c])  # Convert folder name to string
+    
+    # Create the full folder path
+    full_folder_path = os.path.join(base_directory, folder_name)
+    
+    # Create the folder if it doesn't exist
+    if not os.path.exists(full_folder_path):
+        os.makedirs(full_folder_path)
+    
+    # Download the image
+    try:
+        img_data = requests.get(img_url).content
+        # Save the image
+        img_path = os.path.join(full_folder_path, img_name)
+        with open(img_path, 'wb') as handler:
+            handler.write(img_data)
+        print(f"Successfully downloaded and saved: {img_name} in {full_folder_path}")
+    except Exception as e:
+        print(f"Failed to download {img_url}: {e}")
+
+# Add '.jpg' extension to files that don't have an extension
+for root, dirs, files in os.walk(base_directory):
+    for file in files:
+        # Construct full file path
+        file_path = os.path.join(root, file)
+        
+        # Check if the file already has an extension, if not, add '.jpg'
+        if not os.path.splitext(file_path)[1]:
+            new_file_path = f"{file_path}.jpg"
+            os.rename(file_path, new_file_path)
+            print(f"Renamed {file_path} to {new_file_path}")
+
+print("All images have been processed and renamed if necessary.")
